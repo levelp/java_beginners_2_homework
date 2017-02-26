@@ -1,4 +1,4 @@
 * Знакомство
 * Системы автоматизации сборки. Maven.
 * Системы контроля версий. Git.
-* TDD (Test-Driven Development). Демонстрация процесса.
+* TDD (Test-Driven Development). Демонстрация процесса. JUnit.
