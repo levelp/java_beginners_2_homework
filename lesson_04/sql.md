@@ -147,3 +147,145 @@ create table network_access (
 * Next
 * Close
 * Выбрать из **EER Diagrams** соответствующую сгенерированную (она там одна)
+
+
+Вставка данных
+===
+
+Вставка данных в таблицу осуществляется с помощью insert. Например:
+```sql
+-- Добавляем нового учителя с телефоном
+insert into teachers (first_name, last_name, middle_name, phone) 
+             values ('Eugene', 'Price', 'Stephanie', '46-(904)714-1532');
+-- Здесь мы добавляем нового учителя без телефона
+insert into teachers (first_name, last_name, middle_name)
+             values ('Kathy', 'Gibson', 'Karen');
+```
+
+
+
+Заполняем базу случайными данными
+---
+
+Здесь я возьму данные из [mockaroo](https://www.mockaroo.com/). Вы можете сгенерировать их сами или добавить их из файлов в репозитории папка **lesson_04/mock**
+
+
+### Таблица teachers
+Я вставляю в нее данные из **teachers.sql**.
+После этого можно уже работать с этой таблицей. Например, вывести всех учителей
+```sql
+select * from teachers;
+```
+Вывести их же, отсортировав по фамилиям по возрастанию
+```sql
+select * from teachers order by last_name;
+```
+Вывести их же, отсортировав по фамилиям по убыванию
+```sql
+select * from teachers order by last_name desc;
+```
+
+Вывести только ФИО всех учителей по возрастанию
+```sql
+select first_name, last_name, middle_name from teachers order by last_name;
+```
+
+Вывести только первые 10 ФИО учителей по возрастанию
+```sql
+select first_name, last_name, middle_name from teachers order by last_name
+limit 10;
+```
+Вывести 10 ФИО учителей по возрастанию с 10 по 20
+```sql
+select first_name, last_name, middle_name from teachers order by last_name
+limit 10 offset 10;
+```
+
+Вывести 10 фамилий учителей по возрастанию
+```sql
+select last_name from teachers order by last_name;
+```
+
+Вывести 10 уникальных фамилий учителей по возрастанию
+```sql
+select distinct last_name from teachers order by last_name;
+```
+Вывести учителя с id = 23
+```sql
+select * from teachers where id = 23;
+```
+Вывести всех учителей, чьи фамилии начинаются с буквы **'T'**, отсортировав их по имени в порядке возрастания
+```sql
+select * from teachers where last_name like 'T%' order by first_name;
+```
+
+#### А вот и агрегирующие функции
+
+Можно подсчитать количество учителей (агрегирующая функция _**count**_)
+```sql
+select count(*) from teachers;
+```
+Можно подсчитать самую длинную фамилию (агрегирующая функция _**max**_)
+```sql
+select max(length(last_name)) from teachers;
+```
+Можно вывести самые длинные фамилии (вложенные запросы, агрегирующая функция _**max**_)
+```sql
+select last_name from teachers
+where length(last_name) = (select max(length(last_name)) from teachers);
+```
+То же самое - самые короткие (вложенные запросы, агрегирующая функция _**min**_)
+```sql
+select last_name from teachers
+where length(last_name) = (select min(length(last_name)) from teachers);
+```
+
+Можно посчитать количество людей с фамилией меньше, чем 7 символов
+```sql
+select count(*) from teachers
+where length(last_name) < 6 order by last_name;
+```
+Можно посчитать количество фамилий короче, чем 7 символов
+```sql
+select count(distinct last_name) from teachers
+where length(last_name) < 6 order by last_name;
+```
+
+
+#### Перейдем к запросам еще сложнее
+Сгруппируем учителей по имени и выведем, сколько учителей у нас имеют такое имя
+```sql
+select first_name, count(*) from teachers
+group by first_name;
+```
+
+А теперь отсортируем их по количеству человек на имя так, что сверху будут самые частые
+```sql
+select first_name, count(*) from teachers
+group by first_name
+order by count(*) desc;
+```
+
+Выкинем из группировки всех тех, у кого отчество от 7 букв и более
+```sql
+select first_name, count(*) from teachers
+where length(middle_name) < 7
+group by first_name
+order by count(*) desc;
+```
+
+А теперь еще выведем те группы, в которых оказалось больше одного человека
+```sql
+select first_name, count(*) from teachers
+where length(middle_name) < 7
+group by first_name
+having count(*) > 1
+order by count(*) desc;
+```
+
+
+
+
+
+
+
