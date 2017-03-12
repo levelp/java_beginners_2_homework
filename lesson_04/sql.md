@@ -322,9 +322,76 @@ group by first_name
 order by count(*) desc;
 ```
 
+#### Можно ли одну и ту же таблицу использовать в одном запросе несколько раз?
 
+Давайте проанализируем данные и определим, есть ли у нас среди учителей те, которые потенциально могли бы образовать семью? Используем алиасы, и выведем имена однофамильцев.
+```sql
+select t1.first_name, t2.first_name, t1.last_name 
+  from teachers t1, teachers t2
+ where t1.last_name = t2.last_name
+```
 
+Мы видим, что у нас в запросе получились пары, где один преподаватель с двух сторон (например, Тереза с ней же самой). Исправим это
 
+```sql
+select t1.first_name, t2.first_name, t1.last_name 
+  from teachers t1, teachers t2
+ where t1.last_name = t2.last_name 
+       and not t1.id = t2.id
+```
 
+Теперь для каждой пары учителей у меня появилось две строчки. Напремер, Дебора и Стефан + Стефан и Дебора. Исправим это, потребовав, чтобы id слева был строго меньше id справа.
 
+```sql
+select t1.first_name, t2.first_name, t1.last_name 
+  from teachers t1, teachers t2
+ where t1.last_name = t2.last_name 
+       and t1.id < t2.id
+```
 
+Так как пол нам не известен, то мы больше ничего предположить не можем. :)
+
+#### Как иметь дело со значениями NULL?
+```sql
+select * 
+  from teachers 
+ where phone is null;
+```
+```sql
+select * 
+  from teachers 
+ where phone is not null;
+```
+```sql
+select * 
+  from teachers 
+ where not phone is null;
+```
+
+**Не сработают прямые сравнения**
+Например, код ниже в обоих случаях вернет пустой набор, так как `<something> = null` всегда возвращает **NULL**:
+```sql
+select * 
+  from teachers 
+ where phone = null;
+```
+```sql
+select * 
+  from teachers 
+ where not phone = null;
+```
+
+И даже так:
+```sql
+select * 
+  from teachers 
+ where null = null;
+```
+
+Чтобы проверить, что происходит, можно выполнить:
+```sql
+select null = null, 1 = null, 0 = null, 
+       null < null, 1 < null, 0 < null, 
+       null > null, 1 > null, 0 > null,
+       not null = null, not 1 = null, not 0 = null, not null;
+```
