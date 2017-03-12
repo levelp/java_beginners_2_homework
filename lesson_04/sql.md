@@ -92,9 +92,7 @@ create table course_session (
       date_end datetime not null,              -- дата конца курса (непустая)
        
        -- пара "курс и учитель" должны быть из соответствующей таблицы `teaching_courses`
-   foreign key(course_id, teacher_id) references teaching_courses(course_id, teacher_id),
-       -- требование, чтобы начало курса было раньше конца
-         check(date_start < date_end)
+   foreign key(course_id, teacher_id) references teaching_courses(course_id, teacher_id)
 )
 ```
 
@@ -480,5 +478,48 @@ select concat(teachers.first_name, ' ', teachers.middle_name, ' ', teachers.last
                  ' teaches ', courses.title, ' on ', courses.study_year, ' year')
  ```
  
- 
- 
+### Теперь нам хотелось бы заполнить таблицу с треками курса
+Я могу это сделать случайным образом. Я запущу нижеприведенный скрипт 10 раз. Таким образом я сгенерирую (или нет) для каждого курса до 10ти записей. 
+
+```sql
+insert into course_session(teacher_id, course_id, date_start, date_end)
+select teacher_id, course_id, dates.d, date_sub(dates.d, interval floor(1 + rand() * 200) day)
+  from teaching_courses, (
+                           select FROM_UNIXTIME(
+                                      UNIX_TIMESTAMP('2015-01-01 00:00:00') + FLOOR(0 + (RAND() * 1000)) * 86400
+				  ) as d
+		          ) dates
+ where rand() * 100 > 50
+```
+Давайте разберем, что тут написано
+```sql
+-- Генерируем случайную дату в пределах 1000 дней от 1го января 2015 года. 86400 - это количество миллисекунд в дне
+select FROM_UNIXTIME(
+    UNIX_TIMESTAMP('2015-01-01 00:00:00') + FLOOR(0 + (RAND() * 1000)) * 86400
+) 
+```
+```sql
+...
+  -- Здесь я перемножают таблицу со всеми активными курсами на таблицу из одной строки (случайным образом сгенерированное время). 
+  -- Подумайте, почему я не делаю это прямо в верхнем select'е.
+  from teaching_courses, (
+                           select FROM_UNIXTIME(
+                                      UNIX_TIMESTAMP('2015-01-01 00:00:00') + FLOOR(0 + (RAND() * 1000)) * 86400
+				  ) as d
+		          ) dates
+...
+```
+```sql
+...
+-- Внесение случайной компоненты в факт добавления трека. Если убрать ее, то для каждого курса за один запрос сгенерируется
+-- один трек. Я же хочу, чтобы каждый запрос добавлял от 0 до 1го трека.
+where rand() * 100 > 50
+...
+```
+```sql
+...
+-- Здесь я к сгенерированной дате прибавляю случайное количество дней (от 1 до 200)
+date_sub(dates.d, interval floor(1 + rand() * 200) day)
+...
+```
+Таким образом я генерирую случайное количество треков курсов со случайными датами начала и конца.
