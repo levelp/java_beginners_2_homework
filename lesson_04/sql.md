@@ -131,6 +131,9 @@ create table network_access (
 
 Что получилось?
 ===
+
+![ER-Диаграмма](/lesson_04/er-diagram.png?raw=true)
+
 Как сгенерировать, по шагам:
 * Database
 * Reverse Engineering
