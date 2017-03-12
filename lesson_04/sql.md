@@ -478,6 +478,55 @@ select concat(teachers.first_name, ' ', teachers.middle_name, ' ', teachers.last
                  ' teaches ', courses.title, ' on ', courses.study_year, ' year')
  ```
  
+ Но что, если мы хотим вывести данные по всем учителям и курсам, которые они ведут, но нам действительно нужны ВСЕ учителя? Предыдущий запрос вернет информацию лишь по тем, кто действительно ведет курсы. Нам на помощь приходит **join**
+ ```sql
+  select * 
+    from course_session cs 
+         right join teachers t on t.id = cs.teacher_id
+order by cs.teacher_id
+   limit 10
+ ```
+ 
+ По этому запросу вам выдаст первые 10 строк, и если у вас есть учителя, которые не ведут курсы, то там будет информация именно по ним. Дело в том, что тогда ```cs.teacher_id``` будет **NULL**, и при сортировке он окажется в самом начале.
+ 
+ 
+ Немного модифицировав предыдущий запрос, мы можем выполнить запрос
+ ```sql
+  select * 
+    from course_session cs 
+         right join teachers t on t.id = cs.teacher_id
+         left join courses c on c.id = cs.course_id
+order by cs.teacher_id
+   limit 10
+```
+ 
+ И для полноты картины
+ ```sql
+  select concat(t.first_name, ' ', t.middle_name, ' ', t.last_name) as 'teacher', 
+         concat(c.title, ' at ', c.study_year, ' year') as 'course' 
+    from course_session cs 
+         right join teachers t on t.id = cs.teacher_id
+         left join courses c on c.id = cs.course_id
+order by cs.teacher_id
+   limit 100
+ ```
+ 
+ А теперь добавим **case** и получим
+ ```sql
+   select concat(t.first_name, ' ', t.middle_name, ' ', t.last_name) as 'teacher', 
+		 (
+                   case when c.id is null then 'have no courses'
+                        else concat('teaches ', c.title, ' at ', c.study_year, ' year') 
+                   end
+                 ) as 'course'
+    from course_session cs 
+         right join teachers t on t.id = cs.teacher_id
+         left join courses c on c.id = cs.course_id
+order by cs.teacher_id
+   limit 100
+
+ ```
+ 
 ### Теперь нам хотелось бы заполнить таблицу с треками курса
 Я могу это сделать случайным образом. Я запущу нижеприведенный скрипт 10 раз. Таким образом я сгенерирую (или нет) для каждого курса до 10ти записей. 
 
@@ -523,3 +572,25 @@ date_sub(dates.d, interval floor(1 + rand() * 200) day)
 ...
 ```
 Таким образом я генерирую случайное количество треков курсов со случайными датами начала и конца.
+
+
+#### Давайте, проанализируем получившиеся данные.
+
+Сколько курсов всего вел какой учитель?
+```sql
+  select t.id, t.last_name, t.first_name, t.middle_name, count(*)
+    from course_session cs, teachers t
+   where t.id = cs.teacher_id
+group by cs.teacher_id
+```
+
+Сколько раз каждый учитель вел конкретный курс?
+```sql
+  select t.id, t.last_name, t.first_name, t.middle_name, 
+         concat(c.title, ' on ', c.study_year, ' year') as 'course', 
+         concat(cast(count(*) as char), ' times') as 'times'
+    from course_session cs, teachers t, courses c
+   where t.id = cs.teacher_id 
+         and cs.course_id = c.id
+group by cs.teacher_id, cs.course_id
+```
