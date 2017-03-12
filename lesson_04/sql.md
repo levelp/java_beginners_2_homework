@@ -1,3 +1,7 @@
+Создание нашей базы
+===
+
+
 Удаление базы данных, если она уже существует.
 ---
 ```sql
@@ -57,7 +61,7 @@ create table teaching_courses (
        
    foreign key (teacher_id) references teachers(id),
    foreign key (course_id) references courses(id),
-        unique(teacher_id, course_id)
+        primary key(teacher_id, course_id)
 )
 ```
 
@@ -75,3 +79,51 @@ create table students (
          unique(first_name, middle_name, last_name)
 )
 ```
+
+Создаем пятую таблицу с треком курса (то есть место, где будет лежать информация о начале, конце курса (в т.ч. предполагаемом), учителем, который его ведет.
+---
+```sql
+drop table if exists course_session;
+create table course_session (
+            id int auto_increment primary key,
+     course_id int not null,
+    teacher_id int not null,
+    date_start datetime not null,
+      date_end datetime not null,
+       
+   foreign key(course_id, teacher_id) references teaching_courses(course_id, teacher_id),
+         check(date_start < date_end)
+)
+```
+
+Теперь создаем таблицу с оценками ученика по каждому пройденному треку
+---
+```sql
+drop table if exists course_student;
+create table course_student (
+                   id int auto_increment primary key,
+           student_id int not null,
+    course_session_id int not null,
+          result_mark int check(result_mark >= 2 and result_mark <= 5),
+          
+          foreign key(student_id) references students(id),
+          foreign key(course_session_id) references course_session(id),
+               unique(student_id, course_session_id)
+) 
+```
+
+
+Создаем таблицу с учетными данными в компьютерном класса для каждого ученика
+---
+```sql
+drop table if exists network_access;
+create table network_access (
+              id int auto_increment primary key,
+      student_id int not null unique,
+           login varchar(100) not null unique,
+         created datetime not null default now(),
+      
+      foreign key(student_id) references students(id)
+) 
+```
+
