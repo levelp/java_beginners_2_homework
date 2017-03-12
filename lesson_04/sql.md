@@ -420,3 +420,68 @@ select count(*)
 ```sql
 select (select count(*)  from students) + (select count(*)  from teachers)
 ```
+
+### Теперь хорошо бы заполнить таблицу teaching_courses
+Я могу сделать это просто запросом **SQL**, в котором каждый раз просто случайным образом выбираю или нет запись
+```sql
+insert into teaching_courses(teacher_id, course_id)
+select  teachers.id, courses.id
+  from teachers, courses
+ where rand() * 100 > 70
+```
+
+Проверим, сколько записей у нас появилось в таблице
+```sql
+select count(*) from teaching_courses
+```
+
+А теперь рассмотрим простые запросы, которые могут нам дать какую-то информацию о структуре данных.
+
+Например, сколько учителей у нас могут быть заняты работой.
+```sql
+select count(distinct teacher_id)
+  from teaching_courses
+```
+
+Например, сколько учителей у нас могут быть заняты работой.
+```sql
+select count(distinct teacher_id)
+  from teaching_courses
+```
+
+Или сколько курсов у нас не попали ни к одному преподавателю
+```sql
+select count(*)
+  from courses  
+ where not exists (
+				    select * 
+                      from teaching_courses 
+					 where teaching_courses.teacher_id = courses.id
+			      )
+```
+
+Можно вывести, какой учитель ведет какой курс в виде, удобном для пользователя
+```sql
+select concat(teachers.first_name, ' ', teachers.middle_name, ' ', teachers.last_name), 
+       concat(courses.title, ' on ', courses.study_year, ' year')
+  from courses, teachers, teaching_courses
+ where courses.id = teaching_courses.course_id 
+       and teachers.id = teaching_courses.teacher_id
+ ```
+ 
+ Или даже 
+ ```sql
+   select concat(teachers.first_name, ' ', teachers.middle_name, ' ', teachers.last_name, 
+          ' teaches ', courses.title, ' on ', courses.study_year, ' year')
+     from courses, teachers, teaching_courses
+    where courses.id = teaching_courses.course_id 
+          and teachers.id = teaching_courses.teacher_id
+ order by concat(teachers.first_name, ' ', teachers.middle_name, ' ', teachers.last_name, 
+                 ' teaches ', courses.title, ' on ', courses.study_year, ' year')
+ ```
+ 
+ #### Вы так же можете использовать JOIN оператор
+ 
+ ![Join](https://i.stack.imgur.com/VQ5XP.png)
+ 
+ 
