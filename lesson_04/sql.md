@@ -396,3 +396,27 @@ select null = null, 1 = null, 0 = null,
        null > null, 1 > null, 0 > null,
        not null = null, not 1 = null, not 0 = null, not null;
 ```
+
+### Таблицы courses, students так же заполняю данными из файла в репозитории
+Теперь мы можем узнать, кто вообще есть в нашем учебном заведении (все люди):
+```sql
+select last_name, first_name, middle_name from students
+union
+select last_name, first_name, middle_name from teachers
+```
+
+Можно это использовать как подзапрос. Например, как 
+```sql
+select count(*) 
+  from (
+           (
+             select last_name, first_name, middle_name from students
+              union
+             select last_name, first_name, middle_name from teachers
+           ) as all_people
+       )
+```
+Хотя это и неэффективный способ выборки подобных данных (подумайте, почему). Правильным будет 
+```sql
+select (select count(*)  from students) + (select count(*)  from teachers)
+```
