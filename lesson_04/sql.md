@@ -480,8 +480,5 @@ select concat(teachers.first_name, ' ', teachers.middle_name, ' ', teachers.last
                  ' teaches ', courses.title, ' on ', courses.study_year, ' year')
  ```
  
- #### Вы так же можете использовать JOIN оператор
- 
- ![Join](https://i.stack.imgur.com/VQ5XP.png)
  
  
