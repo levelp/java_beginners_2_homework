@@ -129,3 +129,18 @@ create table network_access (
 ) 
 ```
 
+Что получилось?
+===
+Как сгенерировать, по шагам:
+* Database
+* Reverse Engineering
+* выбрать stored connection - ваше подключение
+* Next
+* Next
+* отметить my_study
+* Next
+* Next
+* Execute
+* Next
+* Close
+* Выбрать из **EER Diagrams** соответствующую сгенерированную (она там одна)
