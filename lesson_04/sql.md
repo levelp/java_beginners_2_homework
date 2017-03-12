@@ -594,3 +594,16 @@ group by cs.teacher_id
          and cs.course_id = c.id
 group by cs.teacher_id, cs.course_id
 ```
+
+### И теперь добавим оставшиеся данные в network_access
+```sql
+insert into network_access(student_id, login)
+select s.id, 
+    lower(
+          concat(
+	         substr(s.last_name from 1 for 2), 
+		 substr(s.first_name from 1 for 2), 
+		 substr(s.middle_name from 1 for 2), 
+		 cast(floor(100 + rand() * 899 ) as char)))
+  from students s
+```
