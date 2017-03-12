@@ -558,12 +558,14 @@ select *
 А вот **left join** выведет все значения **левой** таблицы, и соответствующие значения **правой** таблицы, если они существуют. Если не существуют - **NULL**
 ```sql
 select * 
-  from a left join b on a.a1 = b.b1;
+  from a 
+       left join b on a.a1 = b.b1;
 ```
 Как нетрудно догадаться, то же самое для **right join** - выводятся все значения **правой** таблицы и соответствующие для левой, если существуют
 ```sql
 select * 
-  from a right join b on a.a1 = b.b1;
+  from a 
+       right join b on a.a1 = b.b1;
 ```
 
 [Статья про join'ы](http://www.skillz.ru/dev/php/article-Obyasnenie_SQL_obedinenii_JOIN_INNER_OUTER.html)
